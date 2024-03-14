@@ -9,7 +9,7 @@ namespace gnss {
 
 Eigen::Vector3d interpolateSatelliteEphemeris(const std::string &satName, const double epochJd,
                                               const std::vector<EpochEphemeris> &ephemeris) {
-    const auto it = std::lower_bound();
+//    const auto it = std::lower_bound();
 }
 
 }  // namespace gnss

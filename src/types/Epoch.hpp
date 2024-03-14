@@ -6,6 +6,10 @@
 #define GNSS_CPP_EPOCH_HPP
 
 #include <array>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <optional>
 
 namespace gnss {
 
@@ -19,6 +23,21 @@ struct Epoch {
 };
 
 std::optional<double> toJd(const Epoch& epoch);
+
+std::optional<Epoch> fromString(const std::string &date);
+
+
+struct Measurements{
+    double C1W;
+    double L1W;
+};
+
+struct EpochData{
+    Epoch time;
+    std::vector<std::pair<std::string, Measurements>> satelliteData;
+};
+
+
 
 }  // namespace gnss
 

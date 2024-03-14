@@ -16,4 +16,18 @@ std::optional<double> toJd(const Epoch& epoch) {
     return jdDay + jdPart;
 }
 
+/**
+ *
+ * @param date - required time format: YYYY-MM-DDTHH:MM:SS.SSSSSSSSS
+ * @return
+ */
+std::optional<Epoch> fromString(const std::string &date){
+    return Epoch{.year = static_cast<decltype(Epoch::year)>(std::stoi(date.substr(0, 4))),
+            .month = static_cast<decltype(Epoch::month)>(std::stoi(date.substr(5, 7))),
+            .day = static_cast<decltype(Epoch::day)>(std::stoi(date.substr(8, 10))),
+            .hour = static_cast<decltype(Epoch::hour)>(std::stoi(date.substr(11, 13))),
+            .minute = static_cast<decltype(Epoch::minute)>(std::stoi(date.substr(14, 16))),
+            .second = static_cast<decltype(Epoch::second)>(std::stoi(date.substr(17)))};
+}
+
 }
