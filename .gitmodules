@@ -1,3 +1,6 @@
 [submodule "third_party/eigen"]
 	path = third_party/eigen
 	url = https://github.com/karimvafin/eigen
+[submodule "third_party/sofa"]
+	path = third_party/sofa
+	url = https://github.com/karimvafin/sofa
