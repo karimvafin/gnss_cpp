@@ -27,7 +27,11 @@ std::optional<Epoch> fromString(const std::string &date){
             .day = static_cast<decltype(Epoch::day)>(std::stoi(date.substr(8, 10))),
             .hour = static_cast<decltype(Epoch::hour)>(std::stoi(date.substr(11, 13))),
             .minute = static_cast<decltype(Epoch::minute)>(std::stoi(date.substr(14, 16))),
-            .second = static_cast<decltype(Epoch::second)>(std::stoi(date.substr(17)))};
+            .second = static_cast<decltype(Epoch::second)>(std::stod(date.substr(17)))};
+}
+
+std::optional<double> strToJd(const std::string &date){
+    return toJd(fromString(date).value()).value();
 }
 
 }
