@@ -4,7 +4,6 @@
 
 #include "gtest/gtest.h"
 
-#include "src/cycle_slip_detection/CycleSlipData.hpp"
 #include "src/cycle_slip_detection/CycleSlipDetection.hpp"
 
 #include <random>
@@ -45,7 +44,7 @@ std::vector<double> getEpochs() {
     return epochs;
 }
 
-class CYCLE_SLIP: public ::testing::Test{
+class CYCLE_SLIP : public ::testing::Test {
 protected:
     const std::vector<double> pseudorange = getPseudorange();
     const std::vector<double> carrierPhase = getCarrierPhase();
@@ -53,17 +52,14 @@ protected:
     const double tolDeltaT = 15;
 };
 
-TEST_F(CYCLE_SLIP, CYCLE_SLIP_DETECTION){
-    const CycleSlipData cycleSlip = determineCycleSlip(pseudorange,
-                                                       carrierPhase,
-                                                       epochs,
-                                                       tolDeltaT);
+TEST_F(CYCLE_SLIP, CYCLE_SLIP_DETECTION) {
+    const CycleSlipData cycleSlip = determineCycleSlip(pseudorange, carrierPhase, epochs, tolDeltaT);
 
     ASSERT_TRUE(cycleSlip.PRN);
     ASSERT_TRUE(cycleSlip.time);
     ASSERT_TRUE(cycleSlip.isCycleSlipHappend);
 
-    std::cout << "{" << ((cycleSlip.PRN == std::nullopt) ? "nullopt" : std::to_string(cycleSlip.PRN.value()))
-              << ", " << ((cycleSlip.time == std::nullopt) ? "nullopt" : std::to_string(cycleSlip.time.value()))
-              << ", " << (cycleSlip.isCycleSlipHappend ? "true" : "false") << "}" << std::endl;
+    std::cout << "{" << ((cycleSlip.PRN == std::nullopt) ? "nullopt" : std::to_string(cycleSlip.PRN.value())) << ", "
+              << ((cycleSlip.time == std::nullopt) ? "nullopt" : std::to_string(cycleSlip.time.value())) << ", "
+              << (cycleSlip.isCycleSlipHappend ? "true" : "false") << "}" << std::endl;
 }
