@@ -4,7 +4,7 @@
 #include <algorithm>
 
 #include "SatelliteEphemeris.hpp"
-#include "LagrangeInterpolation.hpp"
+#include "src/utils/LagrangeInterpolation.hpp"
 
 namespace gnss {
 
