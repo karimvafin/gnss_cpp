@@ -5,7 +5,7 @@
 #ifndef GNSS_CPP_PARSERS_HPP
 #define GNSS_CPP_PARSERS_HPP
 #include <vector>
-#include "src/types/Epoch.hpp"
+#include "src/types/InputTypes.hpp"
 #include <fstream>
 #include "third_party/json/single_include/nlohmann/json.hpp"
 #include "ContainerConvertion.hpp"
