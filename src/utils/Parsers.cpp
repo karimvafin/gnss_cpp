@@ -13,12 +13,12 @@ namespace gnss::utils{
     for(auto it = jsonData.begin(), itend = jsonData.end(); it != itend; ++it){
         auto epochData = it.value();
         satNum = epochData["sv"].size();
-        std::vector<std::pair<std::string, PhaseCodeMeas>> satelliteData;
+        std::unordered_map<std::string, PhaseCodeMeas> satelliteData;
         satelliteData.reserve(satNum);
         for(unsigned int i = 0; i < satNum; ++i){
-            satelliteData.emplace_back(
+            satelliteData.insert({
                 epochData["sv"][i].get<std::string>(),
-                PhaseCodeMeas{.C1W = epochData["C1W"][i].get<double>(), .L1W = epochData["L1W"][i].get<double>()});
+                PhaseCodeMeas{.C1W = epochData["C1W"][i].get<double>(), .L1W = epochData["L1W"][i].get<double>()}});
         }
         epochsData.push_back({.timeJD = strToJd(it.key()).value(), .satelliteData = satelliteData});
     }
@@ -35,14 +35,14 @@ namespace gnss::utils{
     for(auto it = jsonData.begin(), itend = jsonData.end(); it != itend; ++it){
         auto epochData = it.value();
         satNum = epochData["sv"].size();
-        std::vector<std::pair<std::string, Eigen::Vector3d>> satelliteData;
+        std::unordered_map<std::string, Eigen::Vector3d> satelliteData;
         satelliteData.reserve(satNum);
         for(unsigned int i = 0; i < satNum; ++i){
             pos = epochData["position"][i].get<std::vector<double>>();
             if(pos.size() == 3) {
-                satelliteData.emplace_back(
+                satelliteData.insert({
                     epochData["sv"][i].get<std::string>(),
-                    utils::stlToEigenVector(pos));
+                    utils::stlToEigenVector(pos)});
             }
         }
         epochsData.push_back({.timeJD = strToJd(it.key()).value(), .satelliteData = satelliteData});
