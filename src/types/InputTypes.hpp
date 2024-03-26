@@ -5,7 +5,6 @@
 #ifndef GNSS_CPP_INPUTTYPES_HPP
 #define GNSS_CPP_INPUTTYPES_HPP
 #include <string>
-#include <vector>
 #include <unordered_map>
 #include "Eigen/Dense"
 

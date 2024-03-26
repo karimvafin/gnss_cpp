@@ -9,6 +9,8 @@
 #include <fstream>
 #include "third_party/json/single_include/nlohmann/json.hpp"
 #include "ContainerConvertion.hpp"
+#include <optional>
+#include "src/types/Epoch.hpp"
 
 namespace gnss::utils{
     /** Функция парсит json файл с данными rinex

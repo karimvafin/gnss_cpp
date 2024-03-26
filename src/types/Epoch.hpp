@@ -5,12 +5,8 @@
 #ifndef GNSS_CPP_EPOCH_HPP
 #define GNSS_CPP_EPOCH_HPP
 
-#include <array>
 #include <string>
-#include <vector>
-#include <unordered_map>
 #include <optional>
-#include "Eigen/Dense"
 
 namespace gnss {
 
