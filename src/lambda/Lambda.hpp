@@ -19,7 +19,8 @@
 #ifndef GNSS_CPP_LAMBDA_HPP
 #define GNSS_CPP_LAMBDA_HPP
 #include "MathFuctions.hpp"
-
+#include "Eigen/Core"
+#include "src/utils/ContainerConvertion.hpp"
 namespace gnss {
 
 /* LD factorization (Q=L'*diag(D)*L) -----------------------------------------*/
@@ -179,7 +180,7 @@ static int search(int n, int m, const double *L, const double *D, const double *
 * return : status (0:ok,other:error)
 * notes  : matrix stored by column-major order (fortran convension)
 *-----------------------------------------------------------------------------*/
-extern int lambda(int n, int m, const double *a, const double *Q, double *F, double *s) {
+extern int lambda(const int n, const int m, const double *a, const double *Q, double *F, double *s) {
     int info;
     double *L, *D, *Z, *z, *E;
 
@@ -276,5 +277,23 @@ extern int lambda_search(int n, int m, const double *a, const double *Q, double 
     free(D);
     return info;
 }
+
+std::tuple<Eigen::MatrixXd, Eigen::VectorXd> lambdaModified(const unsigned n, const unsigned m, const Eigen::VectorXd &aEigenVec,
+                                                                           const Eigen::MatrixXd &QEigenMat){
+    double *a;
+    Eigen::VectorXd::Map(a, aEigenVec.rows()) = aEigenVec;
+    double *Q;
+    Eigen::MatrixXd::Map(Q, QEigenMat.rows(), QEigenMat.cols()) = QEigenMat;
+
+    double F[n*m], s[m];
+
+    lambda(n, m, a, Q, F, s);
+
+    Eigen::MatrixXd FEigenMat = utils::cArrayToMatrixXd(n, m, F);
+    Eigen::VectorXd sEigenVec = utils::cArrayToVectorXd(n, s);
+
+    return {FEigenMat, sEigenVec};
+}
+
 }
 #endif //GNSS_CPP_LAMBDA_HPP

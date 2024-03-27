@@ -37,7 +37,11 @@ double *zeros(int n, int m)
     p=(double *)calloc(sizeof(double),n*m);
     return p;
 }
-
+/* identity matrix -------------------------------------------------------------
+* generate new identity matrix
+* args   : int    n         I   number of rows and columns of matrix
+* return : matrix pointer (if n<=0, return NULL)
+*-----------------------------------------------------------------------------*/
 double *eye(int n)
 {
     double *p;
@@ -70,6 +74,12 @@ void matcpy(double *A, const double *B, int n, int m)
 {
     memcpy(A,B,sizeof(double)*n*m);
 }
+
+/* new integer matrix ----------------------------------------------------------
+* allocate memory of integer matrix
+* args   : int    n,m       I   number of rows and columns of matrix
+* return : matrix pointer (if n<=0 or m<=0, return NULL)
+*-----------------------------------------------------------------------------*/
 int *imat(int n, int m)
 {
     int *p;
@@ -130,7 +140,7 @@ static void lubksb(const double *A, int n, const int *indx, double *b)
         s=b[i]; for (j=i+1;j<n;j++) s-=A[i+j*n]*b[j]; b[i]=s/A[i+i*n];
     }
 }
-
+/* inverse of matrix ---------------------------------------------------------*/
 int matinv(double *A, int n)
 {
     double d,*B;
@@ -147,7 +157,7 @@ int matinv(double *A, int n)
     return 0;
 }
 
-
+/* solve linear equation -----------------------------------------------------*/
 extern int solve(const char *tr, const double *A, const double *Y, int n,
                  int m, double *X)
 {
