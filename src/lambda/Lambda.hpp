@@ -280,17 +280,17 @@ extern int lambda_search(int n, int m, const double *a, const double *Q, double 
 
 std::tuple<Eigen::MatrixXd, Eigen::VectorXd> lambdaModified(const unsigned n, const unsigned m, const Eigen::VectorXd &aEigenVec,
                                                                            const Eigen::MatrixXd &QEigenMat){
-    double *a;
-    Eigen::VectorXd::Map(a, aEigenVec.rows()) = aEigenVec;
-    double *Q;
-    Eigen::MatrixXd::Map(Q, QEigenMat.rows(), QEigenMat.cols()) = QEigenMat;
+    double a[n];
+    Eigen::Map<Eigen::VectorXd>(a, n, 1) = aEigenVec.matrix();
+    double Q[n*n];
+    Eigen::Map<Eigen::MatrixXd>(Q, n, n) = QEigenMat.matrix();
 
     double F[n*m], s[m];
 
     lambda(n, m, a, Q, F, s);
 
-    Eigen::MatrixXd FEigenMat = utils::cArrayToMatrixXd(n, m, F);
-    Eigen::VectorXd sEigenVec = utils::cArrayToVectorXd(n, s);
+    Eigen::MatrixXd FEigenMat = Eigen::Map<Eigen::MatrixXd>(F, n, m);
+    Eigen::VectorXd sEigenVec = Eigen::Map<Eigen::VectorXd>(s, n);
 
     return {FEigenMat, sEigenVec};
 }
