@@ -278,7 +278,15 @@ extern int lambda_search(int n, int m, const double *a, const double *Q, double 
     return info;
 }
 
-std::tuple<Eigen::MatrixXd, Eigen::VectorXd> lambdaModified(const unsigned n, const unsigned m, const Eigen::VectorXd &aEigenVec,
+/** Обертка над lambda алгоритмом из RTKLIB
+ *
+ * @param n - размерность входного вектора
+ * @param m - количество целочисленных векторов - решений алгоритма
+ * @param aEigenVec - double вектор параметров размерности n
+ * @param QEigenMat - матрица ковариации параметров размерности (n, n)
+ * @return
+ */
+inline std::tuple<Eigen::MatrixXd, Eigen::VectorXd> lambda(const unsigned n, const unsigned m, const Eigen::VectorXd &aEigenVec,
                                                                            const Eigen::MatrixXd &QEigenMat){
     double a[n];
     Eigen::Map<Eigen::VectorXd>(a, n, 1) = aEigenVec.matrix();

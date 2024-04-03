@@ -52,7 +52,7 @@ TEST(LAMBDA_TEST, LAMBDA_TEST3)
     Eigen::VectorXd aEigenVec = Eigen::Map<Eigen::VectorXd>(a2, n);
     Eigen::MatrixXd QEigenMat = Eigen::Map<Eigen::MatrixXd>(Q2, n, n);
 
-    auto [F, s] = lambdaModified(n, m, aEigenVec, QEigenMat);
+    auto [F, s] = lambda(n, m, aEigenVec, QEigenMat);
 
     for (int j=0;j<m;j++) {
         for (int i=0;i<n;i++) {
@@ -67,7 +67,7 @@ TEST(LAMBDA_TEST, LAMBDA_TEST4)
 {
     // тест из FAQ по лямбда алгоритму https://www.researchgate.net/publication/227304422_LAMBDA_FAQs
     const int n=3;
-    const int m=1;
+    const int m=2;
 
     Eigen::Vector3d aEigenVec = {5.450, 3.100, 2.970};
     Eigen::Matrix3d QEigenMat {{6.290, 5.978, 0.544},
@@ -75,15 +75,14 @@ TEST(LAMBDA_TEST, LAMBDA_TEST4)
                                  {0.544, 2.340, 6.288}};
 
     Eigen::Vector3i aEigenVecTilda = {5, 3, 4};
-    Eigen::Matrix3d Z  {{-2, 3, 1},
-                         {3, -3, -1},
-                         {-1, 1, 0}};
-    auto [F, s] = lambdaModified(n, m, aEigenVec, QEigenMat);
-
-    for (int i=0;i<n;i++) {
-        assert(F(i) == aEigenVecTilda(i));
+    Eigen::Matrix3d Z {{-2, 3, 1},
+                      {3, -3, -1},
+                      {-1, 1, 0}};
+    auto [F, s] = lambda(n, m, aEigenVec, QEigenMat);
+    for (int i=0;i<n;++i) {
+        assert(F(i, 0) == aEigenVecTilda(i));
     }
 
-    std::cout << s(0) << std::endl;
+    std::cout << s(0) <<" "<< s(1) << std::endl;
     printf("%s test4 : OK\n",__FILE__);
 }
