@@ -4,7 +4,6 @@
 #include "src/lambda/Lambda.hpp"
 #include "gtest/gtest.h"
 #include "LambdaTestData.hpp"
-#include "src/utils/ContainerConvertion.hpp"
 using namespace lambda_test_data;
 using namespace gnss;
 
