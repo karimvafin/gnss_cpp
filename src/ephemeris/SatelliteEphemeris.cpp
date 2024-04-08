@@ -9,8 +9,8 @@
 namespace gnss {
 
 std::optional<Eigen::Vector3d> interpolateSatelliteEphemeris(const std::string& satName, const double epochJd,
-                                                             const std::vector<EpochEphemeris>& ephemeris) {
-    const auto comp = [](const EpochEphemeris& first, const double& second) { return first.epochJd < second; };
+                                                             const std::vector<Sp3Data>& ephemeris) {
+    const auto comp = [](const Sp3Data& first, const double& second) { return first.timeJD < second; };
     const auto it0 = std::lower_bound(ephemeris.begin(), ephemeris.end(), epochJd, comp);
     std::vector<double> epochs;
     epochs.reserve(10);
@@ -22,9 +22,9 @@ std::optional<Eigen::Vector3d> interpolateSatelliteEphemeris(const std::string& 
     const int rightBorder = std::max(4, static_cast<int>(ephemeris.end() - it0));
     for (int i = -leftBorder; i < rightBorder; ++i) {
         const auto currIt = it0 + i;
-        const auto satIt = currIt->satEphemeris.find(satName);
-        if (satIt != currIt->satEphemeris.end()) {
-            epochs.push_back(currIt->epochJd);
+        const auto satIt = currIt->satelliteData.find(satName);
+        if (satIt != currIt->satelliteData.end()) {
+            epochs.push_back(currIt->timeJD);
             coords.push_back(satIt->second);
         }
     }
