@@ -2,9 +2,9 @@
 // Created by Карим Вафин on 06.04.2024.
 //
 #include "ProcessSatData.hpp"
+#include <unordered_set>
 #include "src/Constants.hpp"
 #include "src/ephemeris/SatelliteEphemeris.hpp"
-#include <unordered_set>
 
 namespace gnss {
 
@@ -14,8 +14,9 @@ double calcSinElevationAngle(const Eigen::Vector3d& stationPos, const Eigen::Vec
     return n1.dot(n2);
 }
 
-std::optional<RinexData> findStationData(double timeJd, const std::vector<RinexData>& stationData,
-                                         unsigned int startIndex) {
+std::optional<std::pair<unsigned int, RinexData>> findStationData(double timeJd,
+                                                                  const std::vector<RinexData>& stationData,
+                                                                  unsigned int startIndex) {
     double currTime = stationData[startIndex].timeJD;
     constexpr double epsilon = 1. / 86400;
     constexpr double threshold = 10 * epsilon;
@@ -23,7 +24,7 @@ std::optional<RinexData> findStationData(double timeJd, const std::vector<RinexD
         currTime = stationData[++startIndex].timeJD;
     }
     if (std::abs(currTime - timeJd) <= epsilon) {
-        return stationData[startIndex];
+        return std::pair{startIndex, stationData[startIndex]};
     }
     return std::nullopt;
 }
@@ -90,8 +91,8 @@ unsigned int calcRefSatIndex(const std::vector<std::string>& satOrder,
 std::vector<double> calcFirstDiff(const std::vector<std::string>& satOrder,
                                   const std::unordered_map<std::string, MatchedSatelliteMeasurements>& matchedSats) {
     const unsigned int satNum = satOrder.size();
-    std::vector<double> firstDiff;
-    firstDiff.reserve(2 * satNum);  // сначала все кодовые, затем фазовые измерения
+    std::vector<double> firstDiff(2 * satNum);
+    // сначала все кодовые, затем фазовые измерения
     for (unsigned int i = 0; i < satNum; ++i) {
         firstDiff[i] = (matchedSats.at(satOrder[i]).roverMeas.C1W - matchedSats.at(satOrder[i]).stationMeas.C1W) /
                        Constants::waveL1;  // в длинах волн
@@ -105,10 +106,10 @@ std::vector<double> calcFirstDiff(const std::vector<std::string>& satOrder,
 Eigen::VectorXd calcSecondDiff(const std::vector<double>& firstDiff, unsigned int refSatIndex) {
     const unsigned int satNum = firstDiff.size() / 2;
     Eigen::VectorXd secondDiff(2 * (satNum - 1));
-    for (unsigned int i = 0; i < satNum; ++i) {
+    for (unsigned int i = 0; i < (satNum - 1); ++i) {
         const unsigned int fdIndex = (i < refSatIndex ? i : i + 1);
-        secondDiff[i] = firstDiff[fdIndex] - firstDiff[refSatIndex];
-        secondDiff[satNum - 1 + i] = firstDiff[satNum + fdIndex] - firstDiff[satNum + refSatIndex];
+        secondDiff(i) = firstDiff[fdIndex] - firstDiff[refSatIndex];
+        secondDiff(satNum - 1 + i) = firstDiff[satNum + fdIndex] - firstDiff[satNum + refSatIndex];
     }
     return secondDiff;
 }
@@ -128,8 +129,8 @@ FilterData recalcFilterData(const FilterData& filterData, const std::vector<std:
             P(i, j) = filterData.P(i, j);
         }
     }
-    std::vector<unsigned int> prevIndexes; // индексы оставшихся спутников в старом prevSatOrder
-    std::vector<unsigned int> newIndexes; // индексы оставшихся спутников в новом satOrder
+    std::vector<unsigned int> prevIndexes;  // индексы оставшихся спутников в старом prevSatOrder
+    std::vector<unsigned int> newIndexes;  // индексы оставшихся спутников в новом satOrder
     for (unsigned int i = 0; i < satNum; ++i) {
         // определяем, был ли спутник на предыдущем шаге
         unsigned int satInd;
@@ -169,6 +170,17 @@ FilterData recalcFilterData(const FilterData& filterData, const std::vector<std:
         }
     }
     return FilterData{x, P};
+}
+
+std::vector<Eigen::Vector3d> getSatEphemeris(
+    const std::vector<std::string>& satOrder,
+    const std::unordered_map<std::string, MatchedSatelliteMeasurements>& matchedSats) {
+    std::vector<Eigen::Vector3d> res;
+    res.reserve(satOrder.size());
+    for (const auto& sat : satOrder) {
+        res.push_back(matchedSats.at(sat).position);
+    }
+    return res;
 }
 
 }  // namespace gnss

@@ -15,8 +15,9 @@ namespace gnss {
 
 double calcSinElevationAngle(const Eigen::Vector3d& stationPos, const Eigen::Vector3d& satPos);
 
-std::optional<RinexData> findStationData(double timeJd, const std::vector<RinexData>& stationData,
-                                         unsigned int startIndex = 0);
+std::optional<std::pair<unsigned int, RinexData>> findStationData(double timeJd,
+                                                                  const std::vector<RinexData>& stationData,
+                                                                  unsigned int startIndex = 0);
 
 struct MatchedSatelliteMeasurements {
     double timeJd;
@@ -43,6 +44,10 @@ Eigen::VectorXd calcSecondDiff(const std::vector<double>& firstDiff, unsigned in
 
 FilterData recalcFilterData(const FilterData& filterData, const std::vector<std::string>& prevSatOrder,
                             const std::vector<std::string>& satOrder, const std::vector<double>& singleDiff);
+
+std::vector<Eigen::Vector3d> getSatEphemeris(
+    const std::vector<std::string>& satOrder,
+    const std::unordered_map<std::string, MatchedSatelliteMeasurements>& matchedSats);
 
 }  // namespace gnss
 

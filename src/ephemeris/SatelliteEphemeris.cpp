@@ -5,6 +5,7 @@
 
 #include "SatelliteEphemeris.hpp"
 #include "src/utils/LagrangeInterpolation.hpp"
+#include "Constants.hpp"
 
 namespace gnss {
 
@@ -18,14 +19,14 @@ std::optional<Eigen::Vector3d> interpolateSatelliteEphemeris(const std::string& 
     coords.reserve(10);
 
     // заполняем то, что слева
-    const int leftBorder = std::max(5, static_cast<int>(it0 - ephemeris.begin()));
-    const int rightBorder = std::max(4, static_cast<int>(ephemeris.end() - it0));
+    const int leftBorder = std::min(5, static_cast<int>(it0 - ephemeris.begin()));
+    const int rightBorder = std::min(4, static_cast<int>(ephemeris.end() - it0));
     for (int i = -leftBorder; i < rightBorder; ++i) {
         const auto currIt = it0 + i;
         const auto satIt = currIt->satelliteData.find(satName);
         if (satIt != currIt->satelliteData.end()) {
             epochs.push_back(currIt->timeJD);
-            coords.push_back(satIt->second);
+            coords.push_back(satIt->second * Constants::metersInKm);
         }
     }
     if (epochs.size() < 2) return std::nullopt;

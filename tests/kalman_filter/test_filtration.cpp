@@ -31,24 +31,20 @@ TEST(FILTRATION, TEST1) {
     ASSERT_TRUE(ephDataOpt.has_value());
     const std::vector<Sp3Data>& ephData = ephDataOpt.value();
 
-    //    const int size = (stationData.size() > roverData.size() ? roverData.size() : stationData.size());
-    //    std::cout << std::setprecision(15);
-    //    for (int i = 0; i < size; ++i) {
-    //        std::cout << stationData[i].timeJD << " " << roverData[i].timeJD << std::endl;
-    //    }
-
     const Eigen::Vector3d stationPos = {0, 0, 0};
-    Eigen::VectorXd x(3);
-    x(0) = 0; x(1) = 0; x(2) = 0;
+    Eigen::VectorXd x{stationPos};
+    Eigen::MatrixXd P{{Constants::sigmaPosition, 0, 0}, {0, Constants::sigmaPosition, 0}, {0, 0, Constants::sigmaPosition}};
+    FilterData filterData{x, P};
     std::vector<std::string> satOrder;
-    for (int i = 0; i < roverData.size(); ++i) {
+//    for (int i = 0; i < roverData.size(); ++i) {
+        for (int i = 0; i < 5; ++i) {
         // получение измерений со станции
         const RinexData& roverMeas = roverData[i];
         const auto stationMeasOpt = findStationData(roverMeas.timeJD, stationData);
         if (!stationMeasOpt.has_value()) {
             continue;
         }
-        const RinexData& stationMeas = stationMeasOpt.value();
+        const auto& [startIndex, stationMeas] = stationMeasOpt.value();
 
         // нахождение пересечения спутников ровера и станции, вычисление эфемерид спутников
         const std::unordered_map<std::string, MatchedSatelliteMeasurements> matchedSats =
@@ -68,8 +64,30 @@ TEST(FILTRATION, TEST1) {
 
         // расчет вторых разностей (вектор измерений z)
         Eigen::VectorXd secondDiff = calcSecondDiff(firstDiff, refSatIndex);
+        const unsigned int measDim = secondDiff.size();
 
         // начальное приближение
+        filterData = recalcFilterData(filterData, satOrder, newSatOrder, firstDiff);
+        const unsigned int dim = filterData.x.size();
 
+        Eigen::MatrixXd H = calcMatrixH(getSatEphemeris(newSatOrder, matchedSats), stationPos, refSatIndex);
+        Eigen::MatrixXd Q(dim, dim);
+        Q.setZero();
+        Q(0, 0) = Constants::sigmaPosition;
+        Q(1, 1) = Constants::sigmaPosition;
+        Q(2, 2) = Constants::sigmaPosition;
+        Eigen::MatrixXd R(measDim, measDim);
+        constexpr double measRelError = 1e-5;
+        for (unsigned int j = 0; j < measDim; ++j) R(j, j) = measRelError * secondDiff[j];
+
+//        std::cout << filterData.x << std::endl << std::endl;
+//        std::cout << filterData.P << std::endl << std::endl;
+//        std::cout << secondDiff << std::endl << std::endl;
+//        std::cout << Q << std::endl << std::endl;
+//        std::cout << R << std::endl << std::endl;
+//        std::cout << H << std::endl << std::endl;
+        filterData = filterStep(filterData, secondDiff, Eigen::MatrixXd::Identity(dim, dim), Q, R, H);
+        std::cout << "Dimension: " << dim << "  Result: " << filterData.x << std::endl;
+        satOrder = newSatOrder;
     }
 }
