@@ -5,6 +5,7 @@
 
 #include "src/process_sat_data/ProcessSatData.hpp"
 #include "src/utils/Parsers.hpp"
+#include "src/Constants.hpp"
 
 #include <iomanip>
 
@@ -90,8 +91,38 @@ TEST_F(TestProcessData, MATCH_SATELLITES) {
     }
     //    std::cout << std::endl;
 
-//    const std::vector<std::string> satOrder = {"G32", "G27", "G19", "G12", "G25", "G06"};
-//    const std::vector<std::string> newSatOrder = gnss::updateSatOrder(satOrder, matched);
-//    for (const auto& sat: newSatOrder) std::cout << sat << " ";
-//    std::cout << std::endl;
+    //    const std::vector<std::string> satOrder = {"G32", "G27", "G19", "G12", "G25", "G06"};
+    //    const std::vector<std::string> newSatOrder = gnss::updateSatOrder(satOrder, matched);
+    //    for (const auto& sat: newSatOrder) std::cout << sat << " ";
+    //    std::cout << std::endl;
+}
+
+TEST(TEST_PROCESS_DATA, CALC_MEAS) {
+    Eigen::VectorXd x{{0.1, 0.15, 0.07, 500., 600., 400., 300.}};
+    const std::vector<std::string> satOrder = {"G2", "G3", "G1", "G5"};
+    const std::unordered_map<std::string, gnss::MatchedSatelliteMeasurements> map = {{"G3", {0.0, {}, {}, {1., 1., 1.}}},
+                                                                                     {"G2", {0.0, {}, {}, {1., 2., 1.}}},
+                                                                                     {"G1", {0.0, {}, {}, {2., 1., 3.}}},
+                                                                                     {"G5", {0.0, {}, {}, {4., 4., 4.}}}};
+    const Eigen::Vector3d stationPos = {0.5, 0.7, 0.9};
+    const unsigned int refSatIndex = 3;
+    const Eigen::Vector3d refeph = map.at(satOrder.at(refSatIndex)).position;
+
+    const auto rijrb = [&stationPos, &x, &refeph](const Eigen::Vector3d& eph) {
+        return std::hypot(eph.x() - stationPos.x() - x(0), eph.y() - stationPos.y() - x(1),
+                          eph.z() - stationPos.z() - x(2)) -
+               std::hypot(eph.x() - stationPos.x(), eph.y() - stationPos.y(), eph.z() - stationPos.z()) -
+               (std::hypot(refeph.x() - stationPos.x() - x(0), refeph.y() - stationPos.y() - x(1),
+                           refeph.z() - stationPos.z() - x(2)) -
+                std::hypot(refeph.x() - stationPos.x(), refeph.y() - stationPos.y(), refeph.z() - stationPos.z()));
+    };
+    Eigen::VectorXd ref(6);
+    for (int i = 0; i < 3; ++i) {
+        ref(i) = rijrb(map.at(satOrder.at(i < refSatIndex ? i : i + 1)).position);
+        ref(3 + i) = rijrb(map.at(satOrder.at(i < refSatIndex ? i : i + 1)).position) + gnss::Constants::waveL1 * (x((i < refSatIndex ? i : i + 1) + 3) - x(refSatIndex + 3));
+    }
+
+    const Eigen::VectorXd meas = gnss::calcMeasurement(x, satOrder, map, refSatIndex, stationPos);
+    ASSERT_TRUE(meas.size() == ref.size());
+    for (int i = 0; i < 6; ++i) ASSERT_NEAR(ref(i), meas(i), 1e-15);
 }

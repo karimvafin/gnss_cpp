@@ -31,8 +31,8 @@ TEST(FILTRATION, TEST1) {
     ASSERT_TRUE(ephDataOpt.has_value());
     const std::vector<Sp3Data>& ephData = ephDataOpt.value();
 
-    const Eigen::Vector3d stationPos = {0, 0, 0};
-    Eigen::VectorXd x{stationPos};
+    const Eigen::Vector3d stationPos = {2849194.977, 2246429.678, 5228209.943};
+    Eigen::VectorXd x{{0, 0, 0}};
     Eigen::MatrixXd P{{Constants::sigmaPosition, 0, 0}, {0, Constants::sigmaPosition, 0}, {0, 0, Constants::sigmaPosition}};
     FilterData filterData{x, P};
     std::vector<std::string> satOrder;

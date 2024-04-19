@@ -49,6 +49,10 @@ std::vector<Eigen::Vector3d> getSatEphemeris(
     const std::vector<std::string>& satOrder,
     const std::unordered_map<std::string, MatchedSatelliteMeasurements>& matchedSats);
 
+Eigen::VectorXd calcMeasurement(const Eigen::VectorXd& x, const std::vector<std::string>& satOrder,
+                                const std::unordered_map<std::string, MatchedSatelliteMeasurements>& matchedSats,
+                                unsigned int refSatIndex, const Eigen::Vector3d& stationPos);
+
 }  // namespace gnss
 
 #endif  // GNSS_CPP_PROCESSSATDATA_HPP

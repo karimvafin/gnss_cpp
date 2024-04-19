@@ -183,4 +183,32 @@ std::vector<Eigen::Vector3d> getSatEphemeris(
     return res;
 }
 
+Eigen::VectorXd calcMeasurement(const Eigen::VectorXd& x, const std::vector<std::string>& satOrder,
+                                const std::unordered_map<std::string, MatchedSatelliteMeasurements>& matchedSats,
+                                const unsigned int refSatIndex, const Eigen::Vector3d& stationPos) {
+    const unsigned int satNum = satOrder.size();
+    Eigen::VectorXd res(2 * satNum - 2);
+    const MatchedSatelliteMeasurements& refSat = matchedSats.at(satOrder.at(refSatIndex));
+    const double rir =
+        std::hypot(refSat.position.x() - stationPos.x() - x(0), refSat.position.y() - stationPos.y() - x(1),
+                   refSat.position.z() - stationPos.z() - x(2));
+    const double rib = std::hypot(refSat.position.x() - stationPos.x(), refSat.position.y() - stationPos.y(),
+                                  refSat.position.z() - stationPos.z());
+    const double rirb = rir - rib;
+    for (unsigned int i = 0; i < (satNum - 1); ++i) {
+        const unsigned int satIndex = i < refSatIndex ? i : i + 1;
+        const MatchedSatelliteMeasurements& sat = matchedSats.at(satOrder.at(satIndex));
+        const double rjr =
+            std::hypot(sat.position.x() - stationPos.x() - x(0), sat.position.y() - stationPos.y() - x(1),
+                       sat.position.z() - stationPos.z() - x(2));
+        const double rjb = std::hypot(sat.position.x() - stationPos.x(), sat.position.y() - stationPos.y(),
+                                      sat.position.z() - stationPos.z());
+        const double rjrb = rjr - rjb;
+        const double rjirb = rjrb - rirb;
+        res(i) = rjirb;
+        res(satNum - 1 + i) = rjirb + Constants::waveL1 * (x(3 + satIndex) - x(3 + refSatIndex));
+    }
+    return res;
+}
+
 }  // namespace gnss
