@@ -41,8 +41,7 @@ TEST(FILTRATION, TEST1) {
         {Constants::sigmaPosition, 0, 0}, {0, Constants::sigmaPosition, 0}, {0, 0, Constants::sigmaPosition}};
     FilterData filterData{x, P, {}};
     std::vector<std::string> satOrder;
-//    for (int i = 0; i < roverData.size(); ++i) {
-        for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < roverData.size(); ++i) {
         // получение измерений со станции
         const RinexData& roverMeas = roverData[i];
         const auto stationMeasOpt = findStationData(roverMeas.timeJD, stationData);
@@ -84,6 +83,7 @@ TEST(FILTRATION, TEST1) {
         Q(1, 1) = Constants::sigmaPosition;
         Q(2, 2) = Constants::sigmaPosition;
         Eigen::MatrixXd R(measDim, measDim);
+        R.setZero();
         constexpr double measRelError = 1e-2;
         for (unsigned int j = 0; j < measDim; ++j) R(j, j) = measRelError * secondDiff[j];
 
