@@ -41,14 +41,14 @@ std::unordered_map<std::string, MatchedSatelliteMeasurements> matchSatelliteMeas
         if (itStation == itStationEnd) {
             continue;
         }
-        const double deltaTimeSeconds = it->second.C1W / Constants::lightVelocity;
-        const double ephTime = epoch - deltaTimeSeconds / Constants::secondsInDay;
-        const auto ephSatOpt = interpolateSatelliteEphemeris(satName, ephTime, ephData);
+        //const double deltaTimeSeconds = it->second.C1W / Constants::lightVelocity;
+        //const double ephTime = epoch - deltaTimeSeconds / Constants::secondsInDay;
+        const auto ephSatOpt = interpolateSatelliteEphemeris(satName, epoch, ephData);
         if (!ephSatOpt.has_value()) {
             continue;
         }
-        const Eigen::Vector3d satEph = correctEarthRotation(ephSatOpt.value(), deltaTimeSeconds);
-        res.insert({satName, MatchedSatelliteMeasurements{epoch, it->second, itStation->second, satEph}});
+        //const Eigen::Vector3d satEph = correctEarthRotation(ephSatOpt.value(), deltaTimeSeconds);
+        res.insert({satName, MatchedSatelliteMeasurements{epoch, it->second, itStation->second, ephSatOpt.value()}});
     }
     return res;
 }
