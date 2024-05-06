@@ -15,6 +15,10 @@ using namespace gnss;
 TEST(FILTRATION, TEST1) {
     std::string FILE_PATH = __FILE__;
     std::string dataDirPath = FILE_PATH.substr(0, FILE_PATH.size() - 40) + "/data/";
+    std::string outputDirPath = FILE_PATH.substr(0, FILE_PATH.size() - 40) + "/output/out.csv";
+    FILE* f;
+    f = fopen(outputDirPath.c_str(), "w");
+    fprintf(f, "num,epoch,resx,resy,resz,x,y,z\n");
 
     const std::string roverFile = dataDirPath + "rover_data.json";
     const auto roverDataOpt = utils::parseRinex(roverFile);
@@ -33,11 +37,11 @@ TEST(FILTRATION, TEST1) {
 
     const Eigen::Vector3d stationPos = {2849194.977, 2246429.678, 5228209.943};
     Eigen::VectorXd x{{0, 0, 0}};
-    Eigen::MatrixXd P{{Constants::sigmaPosition, 0, 0}, {0, Constants::sigmaPosition, 0}, {0, 0, Constants::sigmaPosition}};
-    FilterData filterData{x, P};
+    Eigen::MatrixXd P{
+        {Constants::sigmaPosition, 0, 0}, {0, Constants::sigmaPosition, 0}, {0, 0, Constants::sigmaPosition}};
+    FilterData filterData{x, P, {}};
     std::vector<std::string> satOrder;
-//    for (int i = 0; i < roverData.size(); ++i) {
-        for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < roverData.size(); ++i) {
         // получение измерений со станции
         const RinexData& roverMeas = roverData[i];
         const auto stationMeasOpt = findStationData(roverMeas.timeJD, stationData);
@@ -77,17 +81,25 @@ TEST(FILTRATION, TEST1) {
         Q(1, 1) = Constants::sigmaPosition;
         Q(2, 2) = Constants::sigmaPosition;
         Eigen::MatrixXd R(measDim, measDim);
-        constexpr double measRelError = 1e-5;
+        constexpr double measRelError = 1e-2;
         for (unsigned int j = 0; j < measDim; ++j) R(j, j) = measRelError * secondDiff[j];
 
-//        std::cout << filterData.x << std::endl << std::endl;
-//        std::cout << filterData.P << std::endl << std::endl;
-//        std::cout << secondDiff << std::endl << std::endl;
-//        std::cout << Q << std::endl << std::endl;
-//        std::cout << R << std::endl << std::endl;
-//        std::cout << H << std::endl << std::endl;
-        filterData = filterStep(filterData, secondDiff, Eigen::MatrixXd::Identity(dim, dim), Q, R, H);
-        std::cout << "Dimension: " << dim << "  Result: " << filterData.x << std::endl;
+        //        std::cout << filterData.x << std::endl << std::endl;
+        //        std::cout << filterData.P << std::endl << std::endl;
+        //        std::cout << secondDiff << std::endl << std::endl;
+        //        std::cout << Q << std::endl << std::endl;
+        //        std::cout << R << std::endl << std::endl;
+        //        std::cout << H << std::endl << std::endl;
+        const Eigen::VectorXd measFromX =
+            calcMeasurement(filterData.x, newSatOrder, matchedSats, refSatIndex, stationPos);
+        filterData = filterStep(filterData, secondDiff, Eigen::MatrixXd::Identity(dim, dim), Q, R, H, measFromX);
+        fprintf(f, "%d,%f,%f,%f,%f,%f,%f,%f\n", i, roverMeas.timeJD - 2.46032e+06, filterData.residual(0),
+                filterData.residual(1), filterData.residual(2), filterData.x(0), filterData.x(1), filterData.x(2));
+        std::cout << "Epoch: " << roverMeas.timeJD - 2.46032e+06 << " Dimension: " << dim
+                  << "  Result: " << filterData.x(0) << " " << filterData.x(1) << " " << filterData.x(2)
+                  << " Ref sat: " << refSatIndex << std::endl;
         satOrder = newSatOrder;
     }
+
+    fclose(f);
 }

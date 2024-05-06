@@ -13,10 +13,11 @@ namespace gnss {
 struct FilterData {
     Eigen::VectorXd x;
     Eigen::MatrixXd P;
+    Eigen::VectorXd residual;
 };
 
 FilterData filterStep(const FilterData& filterData, const Eigen::VectorXd &meas, const Eigen::MatrixXd& F, const Eigen::MatrixXd& Q,
-                      const Eigen::MatrixXd& R, const Eigen::MatrixXd& H);
+                      const Eigen::MatrixXd& R, const Eigen::MatrixXd& H, const Eigen::VectorXd &measFromX);
 
 Eigen::MatrixXd calcMatrixH(const std::vector<Eigen::Vector3d>& satEphemeris, const Eigen::Vector3d& stationPosition,
                             unsigned int refSatIndex);

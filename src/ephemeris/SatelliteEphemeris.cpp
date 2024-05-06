@@ -34,8 +34,7 @@ std::optional<Eigen::Vector3d> interpolateSatelliteEphemeris(const std::string& 
 }
 
 Eigen::Vector3d correctEarthRotation(const Eigen::Vector3d& vec, const double deltaTime) {
-    constexpr double earthAngularVel = 2 * M_PI / 86400;  // rad/s
-    const double angle = earthAngularVel * deltaTime;
+    const double angle = Constants::earthAngularVel * deltaTime;
     const double cos = std::cos(angle);
     const double sin = std::sin(angle);
     return Eigen::Vector3d{vec.x() * cos - vec.y() * sin, vec.x() * sin + vec.y() * cos, vec.z()};

@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include "src/Constants.hpp"
 #include "src/ephemeris/SatelliteEphemeris.hpp"
+#include <iostream>
 
 namespace gnss {
 
@@ -94,11 +95,11 @@ std::vector<double> calcFirstDiff(const std::vector<std::string>& satOrder,
     std::vector<double> firstDiff(2 * satNum);
     // сначала все кодовые, затем фазовые измерения
     for (unsigned int i = 0; i < satNum; ++i) {
-        firstDiff[i] = (matchedSats.at(satOrder[i]).roverMeas.C1W - matchedSats.at(satOrder[i]).stationMeas.C1W) /
-                       Constants::waveL1;  // в длинах волн
+        firstDiff[i] =
+            (matchedSats.at(satOrder[i]).roverMeas.C1W - matchedSats.at(satOrder[i]).stationMeas.C1W);  // в метрах
         firstDiff[satNum + i] =
-            (matchedSats.at(satOrder[i]).roverMeas.L1W - matchedSats.at(satOrder[i]).stationMeas.L1W) /
-            Constants::waveL1;
+            (matchedSats.at(satOrder[i]).roverMeas.L1W - matchedSats.at(satOrder[i]).stationMeas.L1W) *
+            Constants::waveL1;  // в метрах
     }
     return firstDiff;
 }
