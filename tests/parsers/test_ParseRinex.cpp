@@ -11,7 +11,7 @@ using namespace gnss;
 class DataParseRinex: public ::testing::Test{
 protected:
     const std::string FILE_PATH = __FILE__;
-    const std::string dataDirPAth = FILE_PATH.substr(0, FILE_PATH.size() - 26) + "/data/";
+    const std::string dataDirPAth = FILE_PATH.substr(0, FILE_PATH.size() - 34) + "/data/";
 };
 
 TEST_F(DataParseRinex, TEST_ROVER){
@@ -20,6 +20,10 @@ TEST_F(DataParseRinex, TEST_ROVER){
     std::fstream file(filename);
     nlohmann::json jsonData = nlohmann::json::parse(file);
     ASSERT_EQ(jsonData.size(), data.size());
+    for(auto &&el: data[0].satelliteData){
+        std::cout << "satellite: " << el.first << "; " << "meas: " << el.second.C1W << ", "<< el.second.L1W << std::endl;
+    }
+
 }
 
 TEST_F(DataParseRinex, TEST_STATION){
@@ -28,4 +32,7 @@ TEST_F(DataParseRinex, TEST_STATION){
     std::fstream file(filename);
     nlohmann::json jsonData = nlohmann::json::parse(file);
     ASSERT_EQ(jsonData.size(), data.size());
+    for(auto &&el: data[0].satelliteData){
+        std::cout << "satellite: " << el.first << "; " << "meas: " << el.second.C1W << ", "<< el.second.L1W << std::endl;
+    }
 }

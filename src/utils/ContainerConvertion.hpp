@@ -14,6 +14,7 @@ inline Eigen::Vector3d stlToEigenVector(const std::vector<double> &stlVector) {
     }
     return vec;
 }
+
 }
 
 #endif  // GNSS_CPP_CONTAINERCONVERTION_HPP
