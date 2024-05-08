@@ -7,6 +7,7 @@
 #include "src/process_sat_data/ProcessSatData.hpp"
 #include "src/types/InputTypes.hpp"
 #include "src/utils/Parsers.hpp"
+#include "src/lambda/Lambda.hpp"
 
 #include "gtest/gtest.h"
 
@@ -41,7 +42,8 @@ TEST(FILTRATION, TEST1) {
         {Constants::sigmaPosition, 0, 0}, {0, Constants::sigmaPosition, 0}, {0, 0, Constants::sigmaPosition}};
     FilterData filterData{x, P, {}};
     std::vector<std::string> satOrder;
-    for (int i = 0; i < roverData.size(); ++i) {
+    //for (int i = 0; i < roverData.size(); ++i) {
+    for (int i = 0; i < 1; ++i) {
         // получение измерений со станции
         const RinexData& roverMeas = roverData[i];
         const auto stationMeasOpt = findStationData(roverMeas.timeJD, stationData);
@@ -96,6 +98,20 @@ TEST(FILTRATION, TEST1) {
         const Eigen::VectorXd measFromX =
             calcMeasurement(filterData.x, newSatOrder, matchedSats, refSatIndex, stationPos);
         filterData = filterStep(filterData, secondDiff, Eigen::MatrixXd::Identity(dim, dim), Q, R, H, measFromX);
+
+        Eigen::VectorXd ns(dim - 3);
+        for (int k = 0; k < dim - 3; ++k) {
+            ns(k) = filterData.x(3 + k);
+        }
+        Eigen::MatrixXd Ps(dim - 3, dim - 3);
+        for (int k = 0; k < dim - 3; ++k) {
+            for (int l = 0; l < dim - 3; ++l) {
+                Ps(k, l) = filterData.P(3 + k, 3 + l);
+            }
+        }
+        auto [F, s] = gnss::lambda(dim - 3, 1, ns, Ps);
+        std::cout << ns << std::endl;
+        std::cout << s << std::endl;
         fprintf(f, "%d,%f,%f,%f,%f,%f,%f,%f\n", i, roverMeas.timeJD - 2.46032e+06, filterData.residual(0),
                 filterData.residual(1), filterData.residual(2), filterData.x(0), filterData.x(1), filterData.x(2));
         std::cout << "Epoch: " << roverMeas.timeJD - 2.46032e+06 << " Dimension: " << dim
