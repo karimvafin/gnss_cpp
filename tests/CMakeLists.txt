@@ -1,7 +1,7 @@
 enable_testing()
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
-file(GLOB_RECURSE TEST_SOURCES test_*.cpp)
+file(GLOB_RECURSE TEST_SOURCES test_*.cpp *.hpp)
 SET(LIBS gnss_cpp_lib gtest gtest_main nlohmann_json)
 
 foreach (TEST_FILE IN LISTS TEST_SOURCES)
